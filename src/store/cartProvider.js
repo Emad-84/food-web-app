@@ -1,21 +1,54 @@
-import React from "react";
+import React, { useReducer } from "react";
 import CartContext from "./cart-context";
 
+const defaultCartState = {
+  items: [],
+  totalAmount: 0,
+};
+
+const cartReducer = (state, action) => {
+  if (action.type === "ADD") {
+    const updatedItems = state.items.concat(action.item);
+    const updatedTotalAmount =
+      state.totalAmount + action.item.price * action.item.amoumt;
+    return {
+      items: updatedItems,
+      totalAmount: updatedTotalAmount,
+    };
+  }
+  return defaultCartState;
+};
+
 const CartProvider = (props) => {
-  const addItemToCartHandler = (item) => {};
-  const removeItemFromCartHandler = (id) => {};
+  const [cartState, dispatchCartAction] = useReducer(
+    cartReducer,
+    defaultCartState
+  );
+
+  const addItemToCartHandler = (item) => {
+    dispatchCartAction({
+      type: "ADD",
+      item: item, //item is a name we choose for the data we want to forward, we can name it whatever, ex payload.
+    });
+  };
+  const removeItemFromCartHandler = (id) => {
+    dispatchCartAction({
+      type: "REMOVE",
+      id: id,
+    });
+  };
 
   const cartContext = {
-    items: [],
-    totalAmount: 0,
+    items: cartState.items,
+    totalAmount: cartState.totalAmount,
     addItem: addItemToCartHandler,
     removeItem: removeItemFromCartHandler,
   };
 
   return (
-    <CartContext.provider value={cartContext}>
+    <CartContext.Provider value={cartContext}>
       {props.children}
-    </CartContext.provider>
+    </CartContext.Provider>
   );
 };
 
